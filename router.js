@@ -1,9 +1,64 @@
 const Router = require("koa-router");
 const fs = require('fs');
 const path = require('path');
-
+const jwt = require('jsonwebtoken');
 const router = new Router();
 const moment = require('moment');
+const util = require('./utils');
+
+const gogogo = 'gogogo'; //秘钥
+
+router.post('/login', ctx => {
+    const { username, password } = ctx.request.body;
+    if (!(username === 'admin' && password === 'admin')) {
+        ctx.body = util.res(null, false, '账号密码错误！');
+        return;
+    }
+    /* 要在token中携带的信息 */
+    let payload = { username };
+
+    /* 签发token，此处采用对称加解密来加密签名，密钥为: 'moorain' */
+    const token = jwt.sign(payload, gogogo, {
+        notBefore: 30, // token将在签发的30s后才开始 生效
+        expiresIn: 300 // token的有效时间为120s
+    });
+
+    ctx.cookies.set('token', token, {
+        domain: '', // 写cookie所在的域名
+        path: '/', // 写cookie所在的路径
+        maxAge: 2 * 60 * 60 * 1000, // cookie有效时长
+        expires: new Date(new Date().getTime() + 60 * 1000 * 15), // cookie失效时间
+        httpOnly: false, // 是否只用于http请求中获取
+        overwrite: false // 是否允许重写
+    })
+
+    ctx.type = 'json';
+    ctx.body = util.res(null, true, '登录成功！');
+
+}).use('/morain', (ctx, next) => { // 自定针对 /morain 路由进行处理的中间件
+    /* 从请求头中取出客户端携带的token */
+    const clientToken = ctx.cookies.get('token');
+    let decoded = null;
+    try {
+        decoded = jwt.verify(clientToken, gogogo, { ignoreNotBefore: true });
+        // console.log(decoded, 'decoded')
+        /* 验证成功 */
+        next();
+    } catch (err) {
+        // console.log(err, 'err')
+        // console.log(err.name + ': ' + err.message);
+        /* 捕获错误即已说明无权，抛出401 */
+        // ctx.throw(401);
+        ctx.body = util.res(null, false, '登录信息无效，请重新登录！', { code: 401 });
+    }
+})
+
+router.get('/morain/user', (ctx) => {
+    ctx.body = {
+        isSuccess: true,
+        msg: '验证成功！'
+    };
+})
 
 // 根据需求,读取相应的页面,并返回
 function render(page) {
@@ -27,14 +82,10 @@ async function route(url) {
 }
 
 // 上传文件、文章
-router.post('/uploadfile', async (ctx, next) => {
+router.post('/morain/uploadfile', async (ctx, next) => {
     const { title, description } = ctx.request.body;
     if (!(title && description)) {
-        return ctx.body = {
-            success: false,
-            msg: `名称&描述不能为空！`,
-            data: null,
-        };
+        return ctx.body = util.res(null, false, '名称&描述不能为空！');
     }
     // 获取时间戳
     const now = moment();
@@ -44,7 +95,7 @@ router.post('/uploadfile', async (ctx, next) => {
 
     // if (file.name.indexOf('md') < 0 || file.name.indexOf('MD') < 0) {
     //     return ctx.body = {
-    //         success: false,
+    //         isSuccess: false,
     //         msg: `只支持上传makedown文件，文件名请以md结尾！`,
     //         data: null,
     //     };
@@ -72,18 +123,10 @@ router.post('/uploadfile', async (ctx, next) => {
         const newJsonData = [jsonItem, ...Arr];
         let str = JSON.stringify(newJsonData);
         fs.writeFile(path.join(__dirname, 'public/data/articleLists.json'), str, function (err) {
-            return ctx.body = {
-                success: true,
-                msg: "上传成功！",
-                data: null,
-            };
+            return ctx.body = util.res(null, true, '上传成功！');
         })
     })
-    return ctx.body = {
-        success: false,
-        msg: "",
-        data: null,
-    };
+    return ctx.body = util.res(null, false, '未知错误！');
 });
 
 router.get('/index.html', async (ctx) => {
@@ -99,27 +142,24 @@ router.get('/articleLists', async (ctx) => {
         return new Promise((resolve, reject) => {
             fs.readFile(path.join(__dirname, 'public/data/articleLists.json'), function (err, data) {
                 if (err) {
-                    resolve({ code: -1, msg: '查询失败' + err })
+                    resolve(util.res(null, false, err))
                     return console.error(err);
                 }
                 let jsonData = data.toString();//将二进制的数据转换为字符串
                 if (!jsonData) {
-                    resolve({ code: 0, data: [], success: true })
+                    resolve(util.res([], true, '暂无数据！'))
                     return;
                 }
-
                 jsonData = JSON.parse(jsonData);//将字符串转换为json对象
                 // 有id值=>单个 无id值=>全部
                 if (id) {
-                    console.log(jsonData, 'jsonData')
                     jsonData = jsonData.filter((item) => `${item.id}` === `${id}`);
-                    resolve({ code: 0, data: jsonData, success: true })
+                    resolve(util.res(jsonData, true, '查询成功!'))
                 } else {
-                    resolve({ code: 0, data: jsonData, success: true })
+                    resolve(util.res(jsonData, true, '查询成功!'))
                 }
             })
         })
-
     }
 
     ctx.body = await findJson();
@@ -130,19 +170,19 @@ router.get('/article', async (ctx) => {
     let id = ctx.request.query.id
     if (!id) {
         ctx.body = {
-            success: false,
+            isSuccess: false,
             msg: '参数id错误！'
         }
     }
     let findmd = () => {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             fs.readFile(path.join(__dirname, `public/upload/${id}.md`), function (err, data) {
                 if (err) {
-                    resolve({ code: -1, msg: '查询失败' + err })
+                    resolve(util.res(null, false, err))
                     return console.error(err);
                 }
                 let jsonData = data.toString();//将二进制的数据转换为字符串
-                resolve({ code: 0, data: jsonData, success: true })
+                resolve(util.res(jsonData, true, '查询成功！'))
             })
         })
 
@@ -153,19 +193,16 @@ router.get('/article', async (ctx) => {
 
 
 // 删除文章内容
-router.get('/delete', async (ctx) => {
+router.get('/morain/delete', async (ctx) => {
     let id = ctx.request.query.id
     if (!id) {
-        ctx.body = {
-            success: false,
-            msg: '参数id错误！'
-        }
+        ctx.body = util.res(null, false, '参数id错误！')
     }
     const findJson = () => {
         return new Promise((resolve, reject) => {
             fs.readFile(path.join(__dirname, `public/data/articleLists.json`), function (err, data) {
                 if (err) {
-                    resolve({ code: -1, msg: '删除失败！' + err })
+                    resolve(util.res(null, false, err))
                     return console.error(err);
                 }
                 const jsonData = data.toString();//将二进制的数据转换为字符串
@@ -173,17 +210,13 @@ router.get('/delete', async (ctx) => {
                 const newJsonData = arr.filter((item) => `${item.id}` !== `${id}`);
                 let str = JSON.stringify(newJsonData);
                 if (newJsonData.length === arr.length) {
-                    resolve({ code: -1, msg: '此id数据为空！' + err })
+                    resolve(util.res(null, false, '数据为空！'))
                 }
                 fs.writeFile(path.join(__dirname, 'public/data/articleLists.json'), str, function (err) {
                     if (err) {
-                        resolve({ code: -1, msg: '删除失败！' + err })
+                        resolve(util.res(null, false, err))
                     }
-                    resolve({
-                        success: true,
-                        msg: "删除成功！",
-                        data: null,
-                    });
+                    resolve(resolve(util.res(null, true, "删除成功！")));
                 })
             })
         })
@@ -201,7 +234,7 @@ router.get('/addWeightData', async (ctx) => {
     let weight = ctx.request.query.weight
     if (!weight) {
         ctx.body = {
-            success: false,
+            isSuccess: false,
             msg: '参数错误！'
         }
     }
@@ -234,7 +267,7 @@ router.get('/addWeightData', async (ctx) => {
                         resolve({ code: -1, msg: '更新失败！' + err })
                     }
                     resolve({
-                        success: true,
+                        isSuccess: true,
                         msg: "更新成功！",
                         data: newJsonData,
                     });
@@ -260,7 +293,7 @@ router.get('/weightDatalList', async (ctx) => {
                 }
 
                 const arr = JSON.parse(jsonData);
-                resolve({ success: true, code: 200, msg: '查询成功！', data: arr })
+                resolve({ isSuccess: true, code: 200, msg: '查询成功！', data: arr })
             })
         })
 

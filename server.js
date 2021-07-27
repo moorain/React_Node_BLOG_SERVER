@@ -1,7 +1,6 @@
 const Koa = require('koa');
 const app = new Koa();
 const serve = require("koa-static");
-
 const koaBody = require('koa-body')
 const router = require('./router')
 
