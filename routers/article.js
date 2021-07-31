@@ -10,6 +10,44 @@ const util = require('../utils');
 const gogogo = 'gogogo';
 // 登录验证
 
+// 更新json文件Func
+async function updateJson({ type, newData, id, pathStr }) {
+  // 更新json文件
+  const read = () => {
+    return new Promise((resolve) => {
+      fs.readFile(pathStr, function (err, data) {
+        resolve(data)
+      })
+    })
+  }
+
+  //写入json文件
+  const writeFiles = (str, writePath) => {
+    return new Promise((resolve) => {
+      fs.writeFile(writePath, str, function (err) {
+        resolve(util.res(null, true, '上传成功！'))
+      })
+    })
+  }
+
+  const data = await read();
+
+  let jsonData = data && data.toString();//将二进制的数据转换为字符串
+
+  if (!jsonData) {
+    jsonData = JSON.stringify([])
+  }
+
+  let str;
+  const Arr = JSON.parse(jsonData);
+
+  if (type === 'add') {
+    const newJsonData = [newData, ...Arr];
+    str = JSON.stringify(newJsonData);
+  }
+  const res = await writeFiles(str, pathStr)
+  return res
+}
 
 router.post('/login', ctx => {
   const { username, password } = ctx.request.body;
@@ -44,12 +82,9 @@ router.post('/login', ctx => {
   let decoded = null;
   try {
     decoded = jwt.verify(clientToken, gogogo, { ignoreNotBefore: true });
-    // console.log(decoded, 'decoded')
     /* 验证成功 */
-    await next();
+    decoded.username && await next();
   } catch (err) {
-    // console.log(err, 'err')
-    // console.log(err.name + ': ' + err.message);
     /* 捕获错误即已说明无权，抛出401 */
     // ctx.throw(401);
     ctx.body = util.res(null, false, '登录信息无效，请重新登录！', { code: 401 });
@@ -175,8 +210,6 @@ router.get('/article', async (ctx) => {
   ctx.body = await findmd();
 })
 
-
-
 // 删除文章内容
 router.get('/morain/delete', async (ctx) => {
   let id = ctx.request.query.id
@@ -208,6 +241,40 @@ router.get('/morain/delete', async (ctx) => {
 
   }
   ctx.body = await findJson();
+})
+
+// 添加在线编辑的md文件
+router.post('/morain/addOnlineEditArticle', async (ctx) => {
+  let { title, description, content } = ctx.request.body;
+  const now = moment();
+  const id = now.valueOf();
+  function addFile() {
+    return new Promise((resolve) => {
+      fs.writeFile(path.join(__dirname, `../public/upload/${id}.md`), content, async function (err) {
+        if (err) {
+          resolve(util.res(null, false, "未知错误！"))
+        }
+
+        const pathStr = path.join(__dirname, '../public/data/articleLists.json');
+        const date = now.format('YYYY-MM-DD');
+
+        const jsonItem = {
+          id, date, title, description, operator: 'admin', modefiled: now.format('YYYY-MM-DD HH:mm:SS')
+        }
+
+        const res = await updateJson({
+          pathStr,
+          newData: jsonItem,
+          type: 'add',
+        })
+
+        resolve(res);
+
+      })
+    })
+  }
+  const res = await addFile();
+  ctx.body = res;
 })
 
 
