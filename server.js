@@ -4,6 +4,7 @@ const serve = require("koa-static");
 const koaBody = require('koa-body')
 const registerRouter = require('./routers/index')
 
+app.use(serve(__dirname + "/public/img"));
 app.use(serve(__dirname + "/www"));
 
 app.use(koaBody({ multipart: true }));
