@@ -30,7 +30,9 @@ async function updateJson({ type, newData, id, pathStr }) {
     jsonData = JSON.stringify([])
   }
   let str;
+
   const Arr = JSON.parse(jsonData);
+
   let isAdd = false;
   //复写
   Arr.forEach((i, index) => {
@@ -40,7 +42,7 @@ async function updateJson({ type, newData, id, pathStr }) {
     }
   });
 
-  if (type === 'add' && (!isAdd)) {
+  if (!isAdd) {
     const newJsonData = [newData, ...Arr];
     str = JSON.stringify(newJsonData);
   } else {
@@ -153,9 +155,9 @@ router.post('/codeSave', async (ctx) => {
   await updateJson({
     newData: param,
     type: 'add',
-    id: param.id,
+    id: `${param.id}`,
     pathStr,
-  })
+  });
   ctx.body = util.res(param.key, true, '保存成功!')
 })
 
@@ -174,10 +176,9 @@ router.get('/codeQuery', async (ctx) => {
     })
   }
   const data = await read();
-  const item = (data || []).find((i) => i.id === key);
+  const item = (data || []).find((i) => `${i.id}` === `${key}`);
   ctx.body = util.res(item, true, '查询成功!')
 })
-
 
 router.get('/codeListQuery', async (ctx) => {
   const pathStr = path.join(__dirname, `../public/data/editor.json`)
@@ -195,7 +196,5 @@ router.get('/codeListQuery', async (ctx) => {
   const data = await read();
   ctx.body = util.res(data, true, '查询成功!')
 })
-
-
 
 module.exports = router;
