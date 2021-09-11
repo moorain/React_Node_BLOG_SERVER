@@ -83,6 +83,26 @@ router.get('/articleLists', async (ctx) => {
   ctx.body = await findJson();
 })
 
+// 查询所有图片
+router.get('/queryAllImages', async (ctx) => {
+  let findJson = () => {
+    return new Promise((resolve, reject) => {
+      fs.readdir(path.join(__dirname, '../public/img'), function (err, data) {
+        if (err) {
+          resolve(util.res(null, false, err))
+          return console.error(err);
+        }
+        if (data) {
+          resolve(util.res(data, true, '查询成功!'))
+        }
+      })
+    })
+  }
+
+  ctx.body = await findJson();
+})
+
+
 blogController(router);
 
 module.exports = router;
