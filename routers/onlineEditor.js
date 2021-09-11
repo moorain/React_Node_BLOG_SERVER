@@ -139,7 +139,7 @@ router.post('/codeChange', async (ctx) => {
     // })
     ctx.body = util.res({
       key,
-      url: `http://localhost:8001/${nameStr}`
+      url: `/${nameStr}`
     }, true, '更新成功！')
 
   } catch (err) {
