@@ -2,7 +2,7 @@ const Service = require('egg').Service;
 const sqlite3 = require('sqlite3').verbose();
 
 // 连接数据库
-const db = new sqlite3.Database('./app/database/testDB.db', (err) => {
+const mydb = new sqlite3.Database('./app/database/testDB.db', (err) => {
   if (err) {
     console.log('无法连接数据库:', err);
   } else {
@@ -11,7 +11,10 @@ const db = new sqlite3.Database('./app/database/testDB.db', (err) => {
 });
 
 class HomeService extends Service {
-  db = db
+  constructor(props) {
+    super(props)
+    this.db = mydb;
+  }
 }
 
 module.exports = HomeService;
