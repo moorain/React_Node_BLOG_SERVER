@@ -1,0 +1,15 @@
+{
+  "extends": "eslint-config-egg",
+  "rules": {
+    "arrow-parens": 0,
+    "spaced-comment": 0,
+    "space-before-function-paren": 0,
+    "semi": 0,
+    "no-return-assign": 0,
+    "strict": 0,
+    "comma-dangle": 0,
+    "eol-last": 0,
+    "quotes": 0,
+    "array-bracket-spacing": 0
+  }
+}

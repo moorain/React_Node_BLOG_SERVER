@@ -1,18 +1,33 @@
-# React_Node_BLOG_SERVER
+# morain_server
 
-一个轻量化的node博客服务器，无需配置数据库，配合前端实现对makedown文件的CRUD。
-前端地址：https://github.com/moorain/React_Node_BLOG
 
-## Getting Started
 
-Install dependencies,
+## QuickStart
 
-```bash
-$ npm install
-```
+<!-- add docs here for user -->
 
-Start the dev server,
+see [egg docs][egg] for more detail.
+
+### Development
 
 ```bash
-$ node server
+$ npm i
+$ npm run dev
+$ open http://localhost:7001/
 ```
+
+### Deploy
+
+```bash
+$ npm start
+$ npm stop
+```
+
+### npm scripts
+
+- Use `npm run lint` to check code style.
+- Use `npm test` to run unit test.
+- Use `npm run autod` to auto detect dependencies upgrade, see [autod](https://www.npmjs.com/package/autod) for more detail.
+
+
+[egg]: https://eggjs.org
