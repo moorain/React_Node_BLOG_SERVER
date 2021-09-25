@@ -59,6 +59,22 @@ class HomeService extends ServiceM {
         });
     });
   }
+
+  async queryUserDataByUserName(name) {
+    return new Promise((resolve, reject) => {
+      // 新增内容
+      // tslint:disable-next-line:max-line-length
+      this.db.all(`select * FROM users WHERE userName=?`, [name],
+        (err, row) => {
+          if (err) {
+            // console.log(err);
+            reject(err);
+          } else {
+            return resolve(row);
+          }
+        });
+    });
+  }
 }
 
 module.exports = HomeService;

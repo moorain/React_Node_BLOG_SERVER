@@ -30,6 +30,10 @@ module.exports = appInfo => {
     },
   };
 
+  config.jwt = {
+    secret: "morain_106"
+  };
+
   return {
     ...config,
     ...userConfig,

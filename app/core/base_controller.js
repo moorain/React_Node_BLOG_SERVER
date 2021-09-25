@@ -15,6 +15,14 @@ class BaseController extends Controller {
     };
   }
 
+  error(data, msg) {
+    this.ctx.body = {
+      isSuccess: false,
+      data,
+      msg: msg || '操作失败！'
+    };
+  }
+
   notFound(msg) {
     msg = msg || 'not found';
     this.ctx.throw(404, msg);
