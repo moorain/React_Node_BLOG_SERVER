@@ -12,28 +12,34 @@ const dbQuery = (db, params) => new Promise((resolve, reject) => {
 
 class CodeService extends ServiceM2 {
   // 查询列表所有内容
-  async queryWeightList(limit) {
-    const firstDay = await dbQuery(this.db, {
-      sql: 'select * from pf limit 1',
-      sqlParams: [],
-    })
+  async queryWeightList(curLimit) {
 
     const allCount = await dbQuery(this.db, {
       sql: 'SELECT COUNT(*) FROM pf',
       sqlParams: [],
     })
+    const count = allCount[0]['COUNT(*)'] || 0;
+
+    const limit = count < curLimit ? count : curLimit;
+
+    const firstDay = await dbQuery(this.db, {
+      sql: 'select * from pf limit 1',
+      sqlParams: [],
+    })
+
 
     const lastDays = await dbQuery(this.db, {
       sql: `select * from (select * from pf order by id desc limit ?) a order by id`,
       sqlParams: [limit]
     })
-
+    const curDay = lastDays[limit - 1] || firstDay[0];
+    const lastDay = lastDays[limit - 2] || firstDay[0];
     return {
       firstDay: firstDay[0],
-      curDay: lastDays[limit - 1],
-      lastDay: lastDays[limit - 2],
+      curDay,
+      lastDay,
       lastDays,
-      allCount: allCount[0]['COUNT(*)'],
+      allCount: count,
     }
   }
   // // 根据id查询内容
