@@ -18,4 +18,7 @@ module.exports = app => {
   // Tools
   router.get('/morain/queryToolsByPage', controller.tools.toolslist);
   router.post('/morain/addTool', controller.tools.addTool);
+  // pf
+  router.get('/morain/queryWeightList', controller.pf.queryWeightList);
+  router.post('/morain/addWeightData', controller.pf.addWeight);
 };
