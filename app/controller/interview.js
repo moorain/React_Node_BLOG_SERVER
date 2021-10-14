@@ -13,8 +13,8 @@ class PostController extends Controller {
       title: { type: 'string' },
       extends: { type: 'string' },
       content: { type: 'string' },
-      correctAnswer: { type: 'number' },
-      type: { type: 'number' },
+      correctAnswer: { type: 'string' },
+      type: { type: 'string' },
     };
     ctx.validate(params);
     const res = await ctx.service.interview.add(ctx.request.body);
