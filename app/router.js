@@ -21,4 +21,7 @@ module.exports = app => {
   // pf
   router.get('/morain/queryWeightList', controller.pf.queryWeightList);
   router.post('/morain/addWeightData', controller.pf.addWeight);
+  // interview
+  router.get('/morain/interview/query', controller.interview.query);
+  router.post('/morain/interview/add', controller.interview.add);
 };
