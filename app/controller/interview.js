@@ -20,6 +20,12 @@ class PostController extends Controller {
     const res = await ctx.service.interview.add(ctx.request.body);
     this.success(res);
   }
+
+  async delete() {
+    const { ctx } = this;
+    const res = await ctx.service.interview.delete(ctx.query.id);
+    this.success(res, '删除成功！');
+  }
 }
 
 module.exports = PostController;

@@ -43,19 +43,19 @@ class CodeService extends ServiceM2 {
     });
   }
   // // 删除
-  // async delete(id) {
-  //   return new Promise((resolve, reject) => {
-  //     this.db.all(`DELETE FROM tools WHERE id = ?`, [id],
-  //       (err, row) => {
-  //         if (err) {
-  //           // console.log(err);
-  //           reject(err);
-  //         } else {
-  //           return resolve(row);
-  //         }
-  //       });
-  //   });
-  // }
+  async delete(id) {
+    return new Promise((resolve, reject) => {
+      this.db.all(`DELETE FROM interview WHERE id = ?`, [id],
+        (err, row) => {
+          if (err) {
+            // console.log(err);
+            reject(err);
+          } else {
+            return resolve(row);
+          }
+        });
+    });
+  }
 }
 
 module.exports = CodeService;

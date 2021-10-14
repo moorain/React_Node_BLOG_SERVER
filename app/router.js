@@ -24,4 +24,5 @@ module.exports = app => {
   // interview
   router.get('/morain/interview/query', controller.interview.query);
   router.post('/morain/interview/add', controller.interview.add);
+  router.get('/morain/interview/delete', controller.interview.delete);
 };
