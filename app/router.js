@@ -12,9 +12,9 @@ module.exports = app => {
   router.post('/morain/addOnlineEditArticle', jwt, controller.article.addOnlineEditArticle);
   router.get('/morain/delete', controller.article.delete);
   // code
-  router.get('/codeListQuery', controller.codeList.codeList);
-  router.get('/codeQuery', controller.codeList.codeQuery);
-  router.post('/codeSave', jwt, controller.codeList.codeSave);
+  router.get('/morain/codeListQuery', controller.codeList.codeList);
+  router.get('/morain/codeQuery', controller.codeList.codeQuery);
+  router.post('/morain/codeSave', jwt, controller.codeList.codeSave);
   // Tools
   router.get('/morain/queryToolsByPage', controller.tools.toolslist);
   router.post('/morain/addTool', controller.tools.addTool);
@@ -23,6 +23,7 @@ module.exports = app => {
   router.post('/morain/addWeightData', controller.pf.addWeight);
   // interview
   router.get('/morain/interview/query', controller.interview.query);
+  router.get('/morain/interview/queryById', controller.interview.queryById);
   router.post('/morain/interview/add', controller.interview.add);
   router.get('/morain/interview/delete', controller.interview.delete);
 };

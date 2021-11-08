@@ -9,7 +9,7 @@ class CodeController extends Controller {
 
   async codeQuery() {
     const { ctx } = this;
-    const id = ctx.query.key;
+    const id = ctx.query.id;
     const res = await ctx.service.code.queryById(id);
     this.success(res);
   }

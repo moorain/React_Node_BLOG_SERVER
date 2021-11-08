@@ -34,10 +34,9 @@ class CodeService extends ServiceM2 {
     return new Promise((resolve, reject) => {
       // 新增内容
       this.db.all(`INSERT INTO code_list (title, description, filesJson, userId, userName,createDate) VALUES (?,?,?,?,?,?)`,
-        [`${data.title}`, `${data.description}`, `${data.filesJson}`, '10001', 'admin', '2021-01-01'],
+        [`${data.title}`, `${data.description}`, `${data.filesJson}`, '10001', 'admin', `${data.createDate}`],
         (err, row) => {
           if (err) {
-            // console.log(err);
             reject(err);
           } else {
             return resolve(row);

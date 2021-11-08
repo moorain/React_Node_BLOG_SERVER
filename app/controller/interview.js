@@ -8,6 +8,7 @@ class PostController extends Controller {
   }
 
   async add() {
+
     const { ctx } = this;
     const params = {
       title: { type: 'string' },
@@ -16,8 +17,19 @@ class PostController extends Controller {
       correctAnswer: { type: 'string' },
       type: { type: 'string' },
     };
+    console.log(ctx.request.body)
     ctx.validate(params);
     const res = await ctx.service.interview.add(ctx.request.body);
+    this.success(res);
+  }
+
+  async queryById() {
+    const { ctx } = this;
+    const params = {
+      id: { type: 'number' },
+    };
+    ctx.validate(params);
+    const res = await ctx.service.interview.queryById(ctx.query.id);
     this.success(res);
   }
 
